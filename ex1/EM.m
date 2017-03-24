@@ -1,3 +1,5 @@
+pkg load image;
+
 clear;
 clc;
 
@@ -37,6 +39,7 @@ standard_deviation2 = rand();
 
 label = zeros(size(array_sample, 1));
 i = 0;
+
 while(i<=10000)
   % predict
   if (mod(i, 100) == 0)
