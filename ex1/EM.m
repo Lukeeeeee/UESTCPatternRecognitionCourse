@@ -28,6 +28,9 @@ gray=rgb2gray(img);
 
 % EM algorithm
 % initial parameters
+
+step = 30;
+
 mean1 = rand();
 standard_deviation1 = rand();
 a1 = rand();
@@ -42,7 +45,7 @@ label = zeros(size(array_sample), 1);
 i = 0;
 fflush(stdout);
 
-while(i<=10)
+while(i<=step)
   % predict
   printf("running EM step %d\n", i);
   if (mod(i, 1) == 0)
