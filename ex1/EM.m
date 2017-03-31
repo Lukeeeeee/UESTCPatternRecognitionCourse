@@ -21,20 +21,20 @@ img=img.*Mask;
 subplot(1, 2, 1);
 imagesc(img); 
 title('Original');
-
+gray=rgb2gray(img);
 
 [m2,n2]=size(array_sample)
 
 
 % EM algorithm
 % initial parameters
-mean1 = ones(5, 1) .* rand() ;
-standard_deviation1 = ones(5, 1) .*rand();
-a1 = ones(5, 1) .* (1 / 5);
+mean1 = rand();
+standard_deviation1 = rand();
+a1 = rand();
 
-mean2 = ones(5, 1) .* rand() ;
-standard_deviation2 = ones(5, 1) .*rand();
-a2 = ones(5, 1) .* (1 / 5);
+mean2 = rand();
+standard_deviation2 = rand();
+a2 = 1 - a1;
 
 
 
@@ -42,46 +42,76 @@ label = zeros(size(array_sample), 1);
 i = 0;
 fflush(stdout);
 
-while(i<=50)
+while(i<=10)
   % predict
-  if (mod(i, 5) == 0)
-      fprintf('runing epoch = %d\n', i);
+  printf("running EM step %d\n", i);
+  if (mod(i, 1) == 0)
       countSampleError=0;
       for j=1:m2
-        x=array_sample(j,1:1); % get the rgb from traning set
-        px1=GMM(x,mean1,standard_deviation1, a1);
-        px2=GMM(x,mean2,standard_deviation2, a2);
+        x=array_sample(j,1:1); % get the gra from traning set
+        px1= a1 * computeSingleGaussModule(x, mean1, standard_deviation1 * standard_deviation1);
+        px2= a2 * computeSingleGaussModule(x, mean2, standard_deviation2 * standard_deviation2);
         countSampleError += countError(px1, px2, array_sample(j,5));
        endfor
       fprintf("Error num = %d\n", countSampleError);
       fflush(stdout);
   end
+  % EM 
+  %% E step
+
+  p = zeros(m2, 2);
   for j=1:m2
     x=array_sample(j, 1:1);
-    px1=GMM(x, mean1, standard_deviation1, a1);
-    px2=GMM(x, mean2, standard_deviation2, a2);
-    if (px1 > px2)
-      label(j) = 1;
-     else
-      label(j) = -1;
-     end
-   endfor
-    gama = zeros(m2, 5);
-    for j = 1:m2
-        for k = 1:5
-           if (label(j) == +1)
-                gama(j:k) = computeSingleGaussModule(array_sample(j, 1:1), mean1(k), standard_deviation1(k) * standard_deviation1(k)); 
-           end
-           if (label(j) == -1)
-                gama(j,k) = computeSingleGaussModule(array_sample(j, 1:1), mean2(k), standard_deviation2(k) * standard_deviation2(k));
-           end
-        endfor
-    endfor
-     % TODO 
-    [mean1, standard_deviation1] = computeSingleGaussGradient(graySample, label, +1, mean1, standard_deviation1);
-    [mean2, standard_deviation2] = computeSingleGaussGradient(graySample, label, -1, mean2, standard_deviation2);
+    px1 = computeSingleGaussModule(x, mean1, standard_deviation1 * standard_deviation1);
+    px2 = computeSingleGaussModule(x, mean2, standard_deviation2 * standard_deviation2);
+    p(j, 1) = px1 / (a1 * px1 + a2 * px2);
+    p(j, 2) = px2 / (a1 * px1 + a2 * px2); 
+  endfor
+  
+  %% M step
+
+  mean1_ = 0.0;
+  mean2_ = 0.0;
+
+  standard_deviation1_ = 0.0;
+  standard_deviation2_ = 0.0;
+  a1_ = 0.0;
+  a2_ = 0.0;
+
+  sum_1 = 0.0;
+  sum_2 = 0.0;
+
+  for j  = 1:m2
+    sum_1 += p(j, 1);
+    sum_2 += p(j, 2);
+    a1_ += p(j, 1) / m2;
+    a2_ += p(j, 2) / m2;
+  endfor
+  for j = 1:m2
+    mean1_ += p(j, 1) * array_sample(j, 1:1);
+    mean2_ += p(j, 2) * array_sample(j, 1:1);
+  endfor
+  mean1_ = mean1_ / sum_1;
+  mean2_ = mean2_ / sum_2;
+
+  for j = 1:m2
+    standard_deviation1_ += p(j, 1) * (array_sample(j, 1:1) - mean1_) * (array_sample(j, 1:1) - mean1_);
+    standard_deviation2_ += p(j, 2) * (array_sample(j, 1:1) - mean2_) * (array_sample(j, 1:1) - mean2_);
+  endfor
+  standard_deviation1_ /= sum_1;
+  standard_deviation2_ /= sum_2;
+  standard_deviation1_ = sqrt(standard_deviation1_);
+  standard_deviation2_ = sqrt(standard_deviation2_);
+
+  a1 = a1_;
+  a2 = a2_;
+  mean1 = mean1_;
+  mean2 = mean2_;
+  standard_deviation1 = standard_deviation1_;
+  standard_deviation2 = standard_deviation2_;
+
   i++;
-end
+endwhile
 
 
 R=img(:,:,1); %red  
@@ -96,8 +126,8 @@ for i=1:a
 
 		if (tmpPixel!=0)
 			tmpPixel=double(tmpPixel)/255.0;
-			px1=computeSingleGaussModule(tmpPixel, mean1, standard_deviation1 * standard_deviation1);
-			px2=computeSingleGaussModule(tmpPixel, mean2, standard_deviation2 * standard_deviation2);
+			px1= computeSingleGaussModule(tmpPixel, mean1, standard_deviation1 * standard_deviation1);
+			px2= computeSingleGaussModule(tmpPixel, mean2, standard_deviation2 * standard_deviation2);
 			if (px1>px2)
 				R(i,j) = 255;  
             	G(i,j) = 0;  
