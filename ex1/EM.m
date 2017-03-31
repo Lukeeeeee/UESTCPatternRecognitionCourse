@@ -18,32 +18,24 @@ img=imread('309.bmp');
 
 img=img.*Mask;
 [a,b,c]=size(img)
-%show original img
 subplot(1, 2, 1);
 imagesc(img); 
 title('Original');
-gray=rgb2gray(img);
-%subplot(1, 2, 2);
-%imagesc(gray); 
-%title('Gray');
 
-
-%gray=double(gray)/255.0;
 
 [m2,n2]=size(array_sample)
-graySample=zeros(m2,2);
-graySample(:,1)=array_sample(:,1);
-graySample(:,2)=array_sample(:,5);
+
 
 % EM algorithm
-mean1 = rand();
-standard_deviation1 = rand();
-a1 = 0.5;
+% initial parameters
+mean1 = ones(5, 1) .* rand() ;
+standard_deviation1 = ones(5, 1) .*rand();
+a1 = ones(5, 1) .* (1 / 5);
 
+mean2 = ones(5, 1) .* rand() ;
+standard_deviation2 = ones(5, 1) .*rand();
+a2 = ones(5, 1) .* (1 / 5);
 
-mean2 = rand();
-standard_deviation2 = rand();
-a2 = 0.5;
 
 
 label = zeros(size(array_sample), 1);
@@ -56,27 +48,38 @@ while(i<=50)
       fprintf('runing epoch = %d\n', i);
       countSampleError=0;
       for j=1:m2
-        x=graySample(j,1);
-        px1=computeSingleGaussModule(x,mean1,standard_deviation1 * standard_deviation1);
-        px2=computeSingleGaussModule(x,mean2,standard_deviation2 * standard_deviation2);
-        countSampleError += countError(px1, px2, graySample(j,2));
+        x=array_sample(j,1:1); % get the rgb from traning set
+        px1=GMM(x,mean1,standard_deviation1, a1);
+        px2=GMM(x,mean2,standard_deviation2, a2);
+        countSampleError += countError(px1, px2, array_sample(j,5));
        endfor
       fprintf("Error num = %d\n", countSampleError);
       fflush(stdout);
   end
   for j=1:m2
-    x=graySample(j,1);
-    px1=computeSingleGaussModule(x, mean1, standard_deviation1 * standard_deviation1);
-    px2=computeSingleGaussModule(x, mean2, standard_deviation2 * standard_deviation2);
+    x=array_sample(j, 1:1);
+    px1=GMM(x, mean1, standard_deviation1, a1);
+    px2=GMM(x, mean2, standard_deviation2, a2);
     if (px1 > px2)
       label(j) = 1;
      else
       label(j) = -1;
      end
    endfor
-   
-  [mean1, standard_deviation1] = computeSingleGaussGradient(graySample, label, +1, mean1, standard_deviation1);
-  [mean2, standard_deviation2] = computeSingleGaussGradient(graySample, label, -1, mean2, standard_deviation2);
+    gama = zeros(m2, 5);
+    for j = 1:m2
+        for k = 1:5
+           if (label(j) == +1)
+                gama(j:k) = computeSingleGaussModule(array_sample(j, 1:1), mean1(k), standard_deviation1(k) * standard_deviation1(k)); 
+           end
+           if (label(j) == -1)
+                gama(j,k) = computeSingleGaussModule(array_sample(j, 1:1), mean2(k), standard_deviation2(k) * standard_deviation2(k));
+           end
+        endfor
+    endfor
+     % TODO 
+    [mean1, standard_deviation1] = computeSingleGaussGradient(graySample, label, +1, mean1, standard_deviation1);
+    [mean2, standard_deviation2] = computeSingleGaussGradient(graySample, label, -1, mean2, standard_deviation2);
   i++;
 end
 
