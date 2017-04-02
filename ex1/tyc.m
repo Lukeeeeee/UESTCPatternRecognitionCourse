@@ -15,7 +15,7 @@ img=imread('309.bmp');
 
 
 img=img.*Mask;
-[a,b,c]=size(img)
+[a,b,c]=size(img);
 %show original img
 subplot(1, 2, 1);
 imagesc(img); 
@@ -31,7 +31,7 @@ gray=rgb2gray(img);
 
 
 %try to get module
-[m2,n2]=size(array_sample)
+[m2,n2]=size(array_sample);
 graySample=zeros(m2,2);
 graySample(:,1)=array_sample(:,1);
 graySample(:,2)=array_sample(:,5);

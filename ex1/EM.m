@@ -1,3 +1,5 @@
+function EM(step)
+
 pkg load image;
 
 clear;
@@ -30,15 +32,13 @@ gray=rgb2gray(img);
 % initial parameters
 
 step = 30;
-
-mean1 = rand();
-standard_deviation1 = rand();
+mean1 = 0.4;
+standard_deviation1 = 0.10;
 a1 = rand();
 
-mean2 = rand();
-standard_deviation2 = rand();
+mean2 = 0.7;
+standard_deviation2 = 0.15;
 a2 = 1 - a1;
-
 
 
 label = zeros(size(array_sample), 1);
@@ -152,5 +152,7 @@ resultRGB(:,:,3)=B(:,:);
 subplot(1, 2, 2);
 imagesc(resultRGB); 
 title('resultRGB');
-  
+ 
+ 
+endfunction
   
