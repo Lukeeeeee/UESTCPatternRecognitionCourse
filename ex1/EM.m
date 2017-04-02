@@ -1,6 +1,3 @@
-function EM(step)
-
-pkg load image;
 
 clear;
 clc;
@@ -19,19 +16,18 @@ img=imread('309.bmp');
 
 
 img=img.*Mask;
-[a,b,c]=size(img)
+[a,b,c]=size(img);
 subplot(1, 2, 1);
 imagesc(img); 
 title('Original');
 gray=rgb2gray(img);
 
-[m2,n2]=size(array_sample)
+[m2,n2]=size(array_sample);
 
 
 % EM algorithm
 % initial parameters
 
-step = 30;
 mean1 = 0.4;
 standard_deviation1 = 0.10;
 a1 = rand();
@@ -39,6 +35,8 @@ a1 = rand();
 mean2 = 0.7;
 standard_deviation2 = 0.15;
 a2 = 1 - a1;
+
+step = 30;
 
 
 label = zeros(size(array_sample), 1);
@@ -54,7 +52,9 @@ while(i<=step)
         x=array_sample(j,1:1); % get the gra from traning set
         px1= a1 * computeSingleGaussModule(x, mean1, standard_deviation1 * standard_deviation1);
         px2= a2 * computeSingleGaussModule(x, mean2, standard_deviation2 * standard_deviation2);
-        countSampleError += countError(px1, px2, array_sample(j,5));
+        p1 = px1 / (a1 * px1 + a2 * px2);
+        p2 = px2 / (a1 * px1 + a2 * px2); 
+        countSampleError += countError(p1, p2, array_sample(j,5));
        endfor
       fprintf("Error num = %d\n", countSampleError);
       fflush(stdout);
@@ -153,6 +153,5 @@ subplot(1, 2, 2);
 imagesc(resultRGB); 
 title('resultRGB');
  
- 
-endfunction
+
   
