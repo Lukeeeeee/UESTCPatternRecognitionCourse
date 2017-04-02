@@ -1,6 +1,6 @@
 fprintf("Before running the code, please read the README.md file.\n");
 
-#pkg install image-2.6.1.tar.gz;
+pkg install image-2.6.1.tar.gz;
 pkg load image;
 
 fprintf("The image pkg is installed. \n");
