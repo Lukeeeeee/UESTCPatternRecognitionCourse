@@ -22,5 +22,8 @@ Run:
 
 #### 其他
 Github 仓库地址：
+https://github.com/Lukeeeeee/UESTCPatternRecognitionCourse
+有什么具体的问题欢迎提 issue
 
+2017.4.2
 
